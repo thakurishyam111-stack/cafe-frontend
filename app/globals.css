@@ -1,0 +1,140 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.error-shell {
+  min-height: calc(100vh - 5rem);
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 3vw, 2rem);
+  background:
+    radial-gradient(circle at top left, rgba(251, 191, 36, 0.22), transparent 35%),
+    linear-gradient(135deg, #fffdf7 0%, #fff7ed 45%, #fef3c7 100%);
+}
+
+.error-card {
+  width: min(100%, 760px);
+  border: 1px solid rgba(146, 64, 14, 0.12);
+  border-radius: 1.75rem;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 20px 60px rgba(120, 53, 15, 0.12);
+  backdrop-filter: blur(16px);
+  text-align: center;
+}
+
+.error-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(249, 115, 22, 0.12);
+  color: #9a2c00;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.error-title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 1rem;
+}
+
+.error-copy {
+  font-size: clamp(1rem, 2.2vw, 1.1rem);
+  line-height: 1.7;
+  color: #4b5563;
+  margin: 0 auto 1.5rem;
+  max-width: 620px;
+}
+
+.error-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.error-btn-primary,
+.error-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 8.5rem;
+  padding: 0.8rem 1.1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.error-btn-primary {
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  color: white;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.2);
+}
+
+.error-btn-secondary {
+  background: #fff7ed;
+  color: #9a2c00;
+  border: 1px solid rgba(234, 88, 12, 0.18);
+}
+
+.error-btn-primary:hover,
+.error-btn-secondary:hover {
+  transform: translateY(-2px);
+}
+
+.error-note {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .error-card {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+  }
+
+  .error-actions {
+    flex-direction: column;
+  }
+
+  .error-btn-primary,
+  .error-btn-secondary {
+    width: 100%;
+  }
+}
