@@ -56,7 +56,7 @@ const Page = () => {
         phone: parsed.phone || "No phone available",
       });
 
-      console.log(setCasher?.phone)
+      console.log(parsed?.phone)
       setIsAuthenticated(true);
     } catch {
       window.localStorage.removeItem("casherUser");
@@ -310,7 +310,7 @@ const Page = () => {
               </p>
               {/* Item Name */}
               <p className="font-semibold text-slate-900 text-base p-2">{item.title}</p>
-              <p>{item.billNo}</p>
+              <p>{item.billNo || ""}</p>
               {/* Quantity */}
               <p className="text-sm text-slate-500">Qty {item.quantity}</p>
             </div>

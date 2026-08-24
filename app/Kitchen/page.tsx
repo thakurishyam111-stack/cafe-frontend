@@ -23,6 +23,7 @@ interface Order {
   phone: string;
   number: number;
   items: OrderItem[];
+    paymentStatus?: string;
   total: number;
   status: string; // Main aggregate status
   kitchenNote?: string;

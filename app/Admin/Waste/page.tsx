@@ -24,11 +24,14 @@ export default function WasteManagementDashboard() {
     triggerEdit,
     triggerDelete,
     resetForm,
+    activeRecordId,
+    fetchWastes,
+    setIsDeleteModalOpen,
   } = useWaste();
 
   // Visual UI Pill logic for Reasons
-  const getReasonBadgeColor = (reason ) => {
-    const maps = {
+  const getReasonBadgeColor = (reason: string) => {
+    const maps: Record<string, string> = {
       Expired: "bg-red-50 text-red-700 border-red-200",
       Damaged: "bg-amber-50 text-amber-700 border-amber-200",
       spolide: "bg-orange-50 text-orange-700 border-orange-200",
@@ -82,7 +85,11 @@ export default function WasteManagementDashboard() {
           {/* TABS NAVIGATION */}
           <nav className="flex space-x-2 border-b border-slate-200 mb-6">
             <button
-              className={`px-4 py-2.5 text-sm font-medium transition-all border-b-2 relative top-[2px] ${activeTab === "view" ? "border-emerald-600 text-emerald-600 font-semibold" : "border-transparent text-slate-500 hover:text-slate-900"}`}
+              className={`px-4 py-2.5 text-sm font-medium transition-all border-b-2 relative top-[2px] ${
+                activeTab === "view"
+                  ? "border-emerald-600 text-emerald-600 font-semibold"
+                  : "border-transparent text-slate-500 hover:text-slate-900"
+              }`}
               onClick={() => {
                 setActiveTab("view");
                 resetForm();
@@ -383,8 +390,7 @@ export default function WasteManagementDashboard() {
                       required
                     >
                       <option value="" disabled>
-                        Select valid reason 
-                        ...
+                        Select valid reason ...
                       </option>
                       <option value="Expired">Expired</option>
                       <option value="Damaged">Damaged</option>
@@ -404,7 +410,7 @@ export default function WasteManagementDashboard() {
                     </label>
                     <textarea
                       name="note"
-                      rows="3"
+                      rows={3}
                       value={formData.note}
                       onChange={handleInputChange}
                       placeholder="Add detailed remarks regarding processing error..."

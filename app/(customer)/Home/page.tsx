@@ -1,16 +1,18 @@
+
 import React from "react";
 import Link from "next/link";
+
 import About from "@/components/About";
-import Dashbord from "@/components/Sidebar";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import Today from "@/components/Today";
-import Map from "@/components/Map";
 import { Clock, Wifi } from "lucide-react";
+import Map from "@/components/Map";
+
 
 export default function Page() {
   return (
-    <div className="min-h-screen  text-slate-900">
+    <div className="min-h-screen text-slate-900">
       <main className="mx-auto w-full max-w-6xl px-6 py-10 sm:px-8">
         <img
           src="https://pub-ba1a74be17d7442a9f2541946eb9510e.r2.dev/shops/1f9d454c-3294-4b26-9606-97ca603ce304/2.jpg"
@@ -91,7 +93,7 @@ export default function Page() {
             </div>
           </div>
         </section>
-        <Map />
+        <Map/>
         <section className="mt-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           <article className="rounded-[1.75rem] border border-slate-200 bg-white p-8 shadow-sm">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-700">
@@ -209,3 +211,4 @@ export default function Page() {
     </div>
   );
 }
+

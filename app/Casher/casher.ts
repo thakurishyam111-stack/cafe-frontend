@@ -4,14 +4,17 @@ import { api } from "@/lib/api";
 export type CasherUser = {
   id?: string;
   fullName?: string;
+  name?:string;
   email?: string;
   phone?: string;
 };
 
 export type OrderItem = {
-  name: string;
+  name?: string;
+  title?: string;
   quantity: number;
   price: number;
+  billNo?: string;
 };
 
 export type OrderData = {

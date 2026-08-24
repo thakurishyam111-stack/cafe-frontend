@@ -7,12 +7,29 @@ import AdminSidebar from "@/components/AdminSidebar";
 
 const API = "/api/today";
 
-export default function TodayAdmin() {
-  const [items, setItems] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [editId, setEditId] = useState(null);
+interface TodayItem {
+  _id: string;
+  title: string;
+  price: string | number;
+  category: string;
+  description: string;
+  image: string;
+}
 
-  const [form, setForm] = useState({
+interface TodayForm {
+  title: string;
+  price: string;
+  category: string;
+  description: string;
+  image: string;
+}
+
+export default function TodayAdmin() {
+  const [items, setItems] = useState<TodayItem[]>([]);
+  const [open, setOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+
+  const [form, setForm] = useState<TodayForm>({
     title: "",
     price: "",
     category: "",
@@ -24,6 +41,7 @@ export default function TodayAdmin() {
   const fetchData = async () => {
     try {
       const response = await api.get(API);
+
       setItems(response.data.today || []);
     } catch (err) {
       console.error("Failed to fetch today specials:", err);
@@ -38,20 +56,38 @@ export default function TodayAdmin() {
   // OPEN ADD
   const openAdd = () => {
     setEditId(null);
-    setForm({ title: "", price: "", category: "", description: "", image: "" });
+
+    setForm({
+      title: "",
+      price: "",
+      category: "",
+      description: "",
+      image: "",
+    });
+
     setOpen(true);
   };
 
   // OPEN EDIT
-  const openEdit = (item) => {
+  const openEdit = (item: TodayItem) => {
     setEditId(item._id);
-    setForm(item);
+
+    setForm({
+      title: item.title,
+      price: String(item.price),
+      category: item.category,
+      description: item.description,
+      image: item.image,
+    });
+
     setOpen(true);
   };
 
   // SAVE
   const save = async () => {
-    if (!form.title || !form.price) return alert("Required fields missing");
+    if (!form.title || !form.price) {
+      return alert("Required fields missing");
+    }
 
     try {
       if (editId) {
@@ -59,6 +95,7 @@ export default function TodayAdmin() {
       } else {
         await api.post(`${API}/add`, form);
       }
+
       setOpen(false);
       fetchData();
     } catch (err) {
@@ -68,7 +105,7 @@ export default function TodayAdmin() {
   };
 
   // DELETE
-  const remove = async (id) => {
+  const remove = async (id: string) => {
     if (!confirm("Delete item?")) return;
 
     try {
@@ -80,161 +117,183 @@ export default function TodayAdmin() {
     }
   };
 
-  return ( <>
-   
-    <AdminSidebar/>
+  return (
+    <>
+      <AdminSidebar />
 
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black text-white p-4 md:p-8 md:pt-6 md:ml-72">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black text-white p-4 md:p-8 md:pt-6 md:ml-72">
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">
+              🔥 Today Special Admin
+            </h1>
 
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">🔥 Today Special Admin</h1>
-          <p className="text-gray-400">Manage daily special menu items</p>
-        </div>
+            <p className="text-gray-400">
+              Manage daily special menu items
+            </p>
+          </div>
 
-        <button
-          onClick={openAdd}
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl font-semibold"
-        >
-          <Plus size={18} />
-          Add Item
-        </button>
-      </div>
-
-      {/* GRID */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-        {items.map((item) => (
-          <div
-            key={item._id}
-            className="bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-green-500 transition"
+          <button
+            onClick={openAdd}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl font-semibold"
           >
-            {/* IMAGE */}
-            <img
-              src={item.image || "https://via.placeholder.com/300"}
-              className="h-90 w-fullobject-cover hover:scale-110 transition-transform duration-300"
-            />
-
-            {/* CONTENT */}
-            <div className="p-4">
-              <h2 className="text-xl font-bold">{item.title}</h2>
-
-              <p className="text-gray-400 text-sm mt-1 line-clamp-2">
-                {item.description}
-              </p>
-
-              <div className="flex justify-between items-center mt-4">
-                <span className="text-green-400 font-bold">
-                  Rs {item.price}
-                </span>
-
-                <span className="text-xs bg-yellow-500/20 px-3 py-1 rounded-full text-yellow-300">
-                  {item.category}
-                </span>
-              </div>
-
-              {/* ACTIONS */}
-              <div className="flex gap-2 mt-4">
-                <button
-                  onClick={() => openEdit(item)}
-                  className="flex-1 flex items-center justify-center gap-1 bg-blue-600/20 text-blue-400 py-2 rounded-lg hover:bg-blue-600/30"
-                >
-                  <Pencil size={16} /> Edit
-                </button>
-
-                <button
-                  onClick={() => remove(item._id)}
-                  className="flex-1 flex items-center justify-center gap-1 bg-red-600/20 text-red-400 py-2 rounded-lg hover:bg-red-600/30"
-                >
-                  <Trash2 size={16} /> Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* MODAL */}
-      {open && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4">
-          <div className="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-gray-800">
-
-            <h2 className="text-xl font-bold mb-4">
-              {editId ? "Update Item" : "Add Item"}
-            </h2>
-
-            <div className="grid gap-3">
-
-              <input
-                placeholder="Title"
-                value={form.title}
-                onChange={(e) =>
-                  setForm({ ...form, title: e.target.value })
-                }
-                className="p-3 rounded bg-gray-800 border border-gray-700"
-              />
-
-              <input
-                placeholder="Price"
-                type="number"
-                value={form.price}
-                onChange={(e) =>
-                  setForm({ ...form, price: e.target.value })
-                }
-                className="p-3 rounded bg-gray-800 border border-gray-700"
-              />
-
-              <input
-                placeholder="Category"
-                value={form.category}
-                onChange={(e) =>
-                  setForm({ ...form, category: e.target.value })
-                }
-                className="p-3 rounded bg-gray-800 border border-gray-700"
-              />
-
-              <input
-                placeholder="Image URL"
-                value={form.image}
-                onChange={(e) =>
-                  setForm({ ...form, image: e.target.value })
-                }
-                className="p-3 rounded bg-gray-800 border border-gray-700"
-              />
-
-              <textarea
-                placeholder="Description"
-                value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
-                className="p-3 rounded bg-gray-800 border border-gray-700"
-              />
-            </div>
-
-            {/* BUTTONS */}
-            <div className="flex gap-3 mt-5">
-              <button
-                onClick={save}
-                className="flex-1 bg-green-600 hover:bg-green-700 py-2 rounded-lg font-semibold"
-              >
-                Save
-              </button>
-
-              <button
-                onClick={() => setOpen(false)}
-                className="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded-lg"
-              >
-                Cancel
-              </button>
-            </div>
-
-          </div>
+            <Plus size={18} />
+            Add Item
+          </button>
         </div>
-      )}
 
-    </div>
+        {/* GRID */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {items.map((item) => (
+            <div
+              key={item._id}
+              className="bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-green-500 transition"
+            >
+              {/* IMAGE */}
+              <img
+                src={
+                  item.image ||
+                  "https://via.placeholder.com/300"
+                }
+                alt={item.title}
+                className="h-90 w-full object-cover hover:scale-110 transition-transform duration-300"
+              />
+
+              {/* CONTENT */}
+              <div className="p-4">
+                <h2 className="text-xl font-bold">
+                  {item.title}
+                </h2>
+
+                <p className="text-gray-400 text-sm mt-1 line-clamp-2">
+                  {item.description}
+                </p>
+
+                <div className="flex justify-between items-center mt-4">
+                  <span className="text-green-400 font-bold">
+                    Rs {item.price}
+                  </span>
+
+                  <span className="text-xs bg-yellow-500/20 px-3 py-1 rounded-full text-yellow-300">
+                    {item.category}
+                  </span>
+                </div>
+
+                {/* ACTIONS */}
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={() => openEdit(item)}
+                    className="flex-1 flex items-center justify-center gap-1 bg-blue-600/20 text-blue-400 py-2 rounded-lg hover:bg-blue-600/30"
+                  >
+                    <Pencil size={16} />
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => remove(item._id)}
+                    className="flex-1 flex items-center justify-center gap-1 bg-red-600/20 text-red-400 py-2 rounded-lg hover:bg-red-600/30"
+                  >
+                    <Trash2 size={16} />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* MODAL */}
+        {open && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4">
+            <div className="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-gray-800">
+              <h2 className="text-xl font-bold mb-4">
+                {editId ? "Update Item" : "Add Item"}
+              </h2>
+
+              <div className="grid gap-3">
+                <input
+                  placeholder="Title"
+                  value={form.title}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      title: e.target.value,
+                    })
+                  }
+                  className="p-3 rounded bg-gray-800 border border-gray-700"
+                />
+
+                <input
+                  placeholder="Price"
+                  type="number"
+                  value={form.price}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      price: e.target.value,
+                    })
+                  }
+                  className="p-3 rounded bg-gray-800 border border-gray-700"
+                />
+
+                <input
+                  placeholder="Category"
+                  value={form.category}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      category: e.target.value,
+                    })
+                  }
+                  className="p-3 rounded bg-gray-800 border border-gray-700"
+                />
+
+                <input
+                  placeholder="Image URL"
+                  value={form.image}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      image: e.target.value,
+                    })
+                  }
+                  className="p-3 rounded bg-gray-800 border border-gray-700"
+                />
+
+                <textarea
+                  placeholder="Description"
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      description: e.target.value,
+                    })
+                  }
+                  className="p-3 rounded bg-gray-800 border border-gray-700"
+                />
+              </div>
+
+              {/* BUTTONS */}
+              <div className="flex gap-3 mt-5">
+                <button
+                  onClick={save}
+                  className="flex-1 bg-green-600 hover:bg-green-700 py-2 rounded-lg font-semibold"
+                >
+                  Save
+                </button>
+
+                <button
+                  onClick={() => setOpen(false)}
+                  className="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded-lg"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </>
   );
 }

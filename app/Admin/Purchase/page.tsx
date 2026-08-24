@@ -19,7 +19,6 @@ interface SupplierOption {
   name?: string;
 }
 
-
 export default function PurchasePage() {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [stocks, setStocks] = useState<StockOption[]>([]);
@@ -218,8 +217,8 @@ export default function PurchasePage() {
     // मङ्गोडीबी अब्जेक्टबाट सिधै ID हरू मात्र फर्म स्टेटमा म्याप गर्न
     const formattedItems = purchase.items.map((item) => ({
       stock:
-        typeof item.stock === "object" && item.stock !== null && "_id" in item.stock
-          ? item.stock._id
+        typeof item.stock === "object" && item.stock !== null
+          ? (item.stock as { _id: string })._id
           : item.stock,
       quantity: item.quantity,
       unit: item.unit,
@@ -230,8 +229,8 @@ export default function PurchasePage() {
     setFormData({
       ...purchase,
       supplier:
-        typeof purchase.supplier === "object" && purchase.supplier !== null && "_id" in purchase.supplier
-          ? purchase.supplier._id
+        typeof purchase.supplier === "object" && purchase.supplier !== null
+          ? (purchase.supplier as { _id: string })._id
           : purchase.supplier,
       items: formattedItems,
     });
@@ -257,7 +256,9 @@ export default function PurchasePage() {
   };
 
   // स्टक आईडीबाट सामानको नाम पत्ता लगाउने हेल्पर फङ्सन (टेबलमा देखाउन)
-  const getStockName = (stockField: string | { name?: string } | null | undefined) => {
+  const getStockName = (
+    stockField: string | { name?: string } | null | undefined,
+  ) => {
     if (typeof stockField === "object" && stockField?.name) {
       return stockField.name;
     }
@@ -343,8 +344,8 @@ export default function PurchasePage() {
                         {p.purchaseNumber}
                       </td>
                       <td className="p-4 border-r border-slate-800 text-slate-400">
-                        {typeof p.supplier === "object" && p.supplier !== null && "name" in p.supplier
-                          ? p.supplier.name
+                        {typeof p.supplier === "object" && p.supplier !== null
+                          ? (p.supplier as { name: string }).name
                           : p.supplier}
                       </td>
                       <td className="p-4 border-r border-slate-800">
@@ -426,11 +427,19 @@ export default function PurchasePage() {
                 {/* Meta Inputs */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Purchase Number *</label>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                      Purchase Number *
+                    </label>
                     <input
-                      type="text" required
+                      type="text"
+                      required
                       value={formData.purchaseNumber}
-                      onChange={(e) => setFormData({ ...formData, purchaseNumber: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          purchaseNumber: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg focus:border-blue-500 outline-none text-white text-sm"
                       placeholder="bill"
                     />
@@ -450,7 +459,9 @@ export default function PurchasePage() {
                       <option value="">Select supplier</option>
                       {suppliers.map((supplier) => (
                         <option key={supplier._id} value={supplier._id}>
-                          {supplier.supplierName || supplier.name || supplier.supplierCode}
+                          {supplier.supplierName ||
+                            supplier.name ||
+                            supplier.supplierCode}
                         </option>
                       ))}
                     </select>
@@ -464,7 +475,8 @@ export default function PurchasePage() {
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          paymentMethod: e.target.value as Purchase["paymentMethod"],
+                          paymentMethod: e.target
+                            .value as Purchase["paymentMethod"],
                         })
                       }
                       className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg focus:border-blue-500 outline-none text-white text-sm"
@@ -650,7 +662,9 @@ export default function PurchasePage() {
                     </div>
                     <div className="flex justify-between text-red-400 font-semibold">
                       <span>Due Amount:</span>
-                      <span>Rs. {calculatedTotals.dueAmount.toLocaleString()}</span>
+                      <span>
+                        Rs. {calculatedTotals.dueAmount.toLocaleString()}
+                      </span>
                     </div>
 
                     <div className="flex justify-between items-center text-slate-400">
@@ -660,7 +674,8 @@ export default function PurchasePage() {
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            paymentStatus: e.target.value as Purchase["paymentStatus"],
+                            paymentStatus: e.target
+                              .value as Purchase["paymentStatus"],
                           })
                         }
                         className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-white text-xs outline-none focus:border-blue-500"
