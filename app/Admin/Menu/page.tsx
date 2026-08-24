@@ -5,7 +5,6 @@ import { api } from "@/lib/api";
 import AdminSidebar from "@/components/AdminSidebar";
 import { Plus, Search } from "lucide-react";
 
-
 type MenuItem = {
   _id?: string;
   title?: string;
@@ -50,29 +49,31 @@ export default function AdminMenuPage() {
   const total = menus.length;
   const categories = useMemo(() => {
     const uniqueCategories = [
-      ...new Set(menus.map((item) => item.category).filter(Boolean) as string[]),
+      ...new Set(
+        menus.map((item) => item.category).filter(Boolean) as string[],
+      ),
     ] as string[];
 
     return ["All", ...uniqueCategories];
   }, [menus]);
 
   const filteredMenus = useMemo(() => {
-  return menus.filter((item) => {
-    const searchTerm = search.trim().toLowerCase();
+    return menus.filter((item) => {
+      const searchTerm = search.trim().toLowerCase();
 
-    const matchesCategory =
-      selectedCategory === "All" ||
-      item.category?.toLowerCase() === selectedCategory.toLowerCase();
+      const matchesCategory =
+        selectedCategory === "All" ||
+        item.category?.toLowerCase() === selectedCategory.toLowerCase();
 
-    const matchesSearch =
-      !searchTerm ||
-      item.title?.toLowerCase().includes(searchTerm) ||
-      item.category?.toLowerCase().includes(searchTerm) ||
-      item.description?.toLowerCase().includes(searchTerm);
+      const matchesSearch =
+        !searchTerm ||
+        item.title?.toLowerCase().includes(searchTerm) ||
+        item.category?.toLowerCase().includes(searchTerm) ||
+        item.description?.toLowerCase().includes(searchTerm);
 
-    return matchesCategory && matchesSearch;
-  });
-}, [menus, search, selectedCategory]);
+      return matchesCategory && matchesSearch;
+    });
+  }, [menus, search, selectedCategory]);
   // ================= FILTER =================
   // const filteredMenus = useMemo(() => {
   //   return menus.filter((m) =>
@@ -279,7 +280,11 @@ export default function AdminMenuPage() {
                     </button>
 
                     <button
-                      onClick={() => deleteMenu(item._id)}
+                      onClick={() => {
+                        if (item._id) {
+                          deleteMenu(item._id);
+                        }
+                      }}
                       className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 py-2 rounded-lg transition-colors border border-red-500/30"
                     >
                       Delete
