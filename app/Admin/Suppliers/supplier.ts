@@ -15,7 +15,7 @@ export interface SupplierData {
 }
 
 // Base path to supplier API endpoints
-const API_BASE_URL = "/api/supplier";
+const API_BASE_URL = "/api/supplier/";
 
 /**
  * सबै Suppliers को सूची तान्ने (Get All)
