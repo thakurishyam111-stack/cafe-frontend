@@ -255,15 +255,15 @@ export default function OrderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-400">
+    <div className="min-h-screen bg-gray-500">
       <main className="max-w-7xl mx-auto px-4 py-10">
         {/* Heading */}
         <div className="text-center mb-10">
-          <h1 className="text-5xl font-bold text-black">
+          <h1 className="text-5xl font-bold text-gray-900">
             🍽 Mero Deurali cafe
           </h1>
 
-          <p className="text-black mt-3">Order your favorite delicious foods</p>
+          <p className="text-gray-100 mt-3">Order your favorite delicious foods</p>
         </div>
 
         {/* Categories */}
@@ -301,7 +301,7 @@ export default function OrderPage() {
                   />
 
                   {/* Content */}
-                  <div className="p-5">
+                  <div className="p-5 bg-gray-300">
                     <div className="flex justify-between items-start">
                       <h2 className="text-xl font-bold text-slate-900">
                         {item.title}

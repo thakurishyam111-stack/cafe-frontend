@@ -73,9 +73,9 @@ const Page = () => {
       <main className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
        
        
-        <section className="mt-10 rounded-[2rem] bg-white/90 p-6 shadow-xl ring-1 ring-slate-200/70 shadow-slate-200/40 backdrop-blur-sm sm:p-8">
+        <section className="mt-10 rounded-[2rem] bg-gray-500 p-6 shadow-xl ring-1 ring-slate-200/70 shadow-slate-200/40 backdrop-blur-sm sm:p-8">
          <div className="text-center">
-        <i className="text-xl  text-center">Deurali cafe all menu items </i>
+        <i className="text-xl text-gray-100 justify-center text-center">Deurali cafe all menu items </i>
        </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
