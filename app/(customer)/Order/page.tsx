@@ -5,7 +5,6 @@ import { api } from "@/lib/api";
 // import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-
 type MenuItem = {
   _id?: string | number;
   id?: string | number;
@@ -34,12 +33,17 @@ export default function OrderPage() {
   const [number, setNumber] = useState("");
   const [billNo, setBillNo] = useState("");
   const [table, setTable] = useState<TableItem | null>(null);
-  const qrToken = typeof window === "undefined"
-    ? ""
-    : new URLSearchParams(window.location.search).get("qrToken") || window.localStorage.getItem("tableQrToken") || "";
+  const qrToken =
+    typeof window === "undefined"
+      ? ""
+      : new URLSearchParams(window.location.search).get("qrToken") ||
+        window.localStorage.getItem("tableQrToken") ||
+        "";
   const [tableVerified, setTableVerified] = useState(false);
   const [tableMessage, setTableMessage] = useState<string | null>(
-    qrToken ? null : "Please scan the table QR code to confirm your table before ordering."
+    qrToken
+      ? null
+      : "Please scan the table QR code to confirm your table before ordering.",
   );
   const [showTableSuccess, setShowTableSuccess] = useState(false);
 
@@ -47,7 +51,6 @@ export default function OrderPage() {
   const [submitted, setSubmitted] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   // Fetch Menu
   useEffect(() => {
@@ -86,7 +89,9 @@ export default function OrderPage() {
 
     const verify = async () => {
       try {
-        const { data } = await api.get(`/api/orders/qr/${encodeURIComponent(qrToken)}/active`);
+        const { data } = await api.get(
+          `/api/orders/qr/${encodeURIComponent(qrToken)}/active`,
+        );
 
         if (data?.success && data.table) {
           setTable({
@@ -114,7 +119,11 @@ export default function OrderPage() {
   // Categories
   const categories = useMemo(() => {
     const unique = Array.from(
-      new Set(menus.map((item: MenuItem) => item.category).filter(Boolean) as string[]),
+      new Set(
+        menus
+          .map((item: MenuItem) => item.category)
+          .filter(Boolean) as string[],
+      ),
     ) as string[];
 
     return ["All", ...unique];
@@ -155,13 +164,13 @@ export default function OrderPage() {
     );
   };
 
-    // Clear Cart
+  // Clear Cart
   const clearCart = () => {
     setCart((prev: MenuItem[]) =>
       prev.map((item: MenuItem) => ({
         ...item,
         quantity: 0,
-      }))
+      })),
     );
 
     setName("");
@@ -171,7 +180,8 @@ export default function OrderPage() {
   // Total
   const total = useMemo(() => {
     return cart.reduce(
-      (sum: number, item: MenuItem) => sum + (item.price ?? 0) * (item.quantity ?? 0),
+      (sum: number, item: MenuItem) =>
+        sum + (item.price ?? 0) * (item.quantity ?? 0),
       0,
     );
   }, [cart]);
@@ -180,10 +190,17 @@ export default function OrderPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const nameRegex = /^[A-Za-z\s]+$/;
+
+    if (!nameRegex.test(name)) {
+      setMessage ("Enter your name only letter");
+      return;
+    }
+
     const phoneRegex = /^(97|98)\d{8}$/;
 
     if (!phoneRegex.test(phone)) {
-      setMessage("Please enter a valid phone number.");
+      setMessage("Please enter a valid phone number like 98/97 and length 10  .");
       return;
     }
 
@@ -192,7 +209,9 @@ export default function OrderPage() {
       return;
     }
 
-    const selectedItems = cart.filter((item: MenuItem) => (item.quantity ?? 0) > 0);
+    const selectedItems = cart.filter(
+      (item: MenuItem) => (item.quantity ?? 0) > 0,
+    );
 
     if (selectedItems.length === 0) {
       setMessage("Please add at least one item to the cart.");
@@ -234,16 +253,16 @@ export default function OrderPage() {
       console.log("ORDER ERROR:", error);
       const serverMessage =
         typeof error === "object" && error !== null && "response" in error
-          ? ((error as any).response?.data?.message || (error as any).response?.data?.error)
+          ? (error as any).response?.data?.message ||
+            (error as any).response?.data?.error
           : error instanceof Error
-          ? error.message
-          : "Order failed. Please try again.";
+            ? error.message
+            : "Order failed. Please try again.";
       setMessage(serverMessage || "Order failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
-
 
   // Loading
   if (loading) {
@@ -263,7 +282,9 @@ export default function OrderPage() {
             🍽 Mero Deurali cafe
           </h1>
 
-          <p className="text-gray-100 mt-3">Order your favorite delicious foods</p>
+          <p className="text-gray-100 mt-3">
+            Order your favorite delicious foods
+          </p>
         </div>
 
         {/* Categories */}
@@ -340,7 +361,9 @@ export default function OrderPage() {
                         </span>
 
                         <button
-                          onClick={() => updateQuantity(item._id ?? item.id ?? "", 1)}
+                          onClick={() =>
+                            updateQuantity(item._id ?? item.id ?? "", 1)
+                          }
                           className="w-10 h-10 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xl"
                         >
                           +
@@ -348,7 +371,9 @@ export default function OrderPage() {
                       </div>
 
                       <button
-                        onClick={() => updateQuantity(item._id ?? item.id ?? "", 1)}
+                        onClick={() =>
+                          updateQuantity(item._id ?? item.id ?? "", 1)
+                        }
                         className="bg-black hover:bg-slate-800 text-white px-4 py-2 rounded-xl"
                       >
                         Add
@@ -408,7 +433,9 @@ export default function OrderPage() {
                             <h3 className="font-bold text-lg">{item.title}</h3>
 
                             <button
-                              onClick={() => removeItem(item._id ?? item.id ?? "")}
+                              onClick={() =>
+                                removeItem(item._id ?? item.id ?? "")
+                              }
                               className="text-red-400 hover:text-red-500 text-sm"
                             >
                               ✕
@@ -431,7 +458,9 @@ export default function OrderPage() {
                                 −
                               </button>
 
-                              <span className="font-bold">{item.quantity ?? 0}</span>
+                              <span className="font-bold">
+                                {item.quantity ?? 0}
+                              </span>
 
                               <button
                                 onClick={() =>
@@ -444,7 +473,7 @@ export default function OrderPage() {
                             </div>
 
                             <span className="font-bold text-amber-400">
-                              Rs {((item.price ?? 0) * (item.quantity ?? 0))}
+                              Rs {(item.price ?? 0) * (item.quantity ?? 0)}
                             </span>
                           </div>
                         </div>
@@ -478,7 +507,10 @@ export default function OrderPage() {
                 </div>
 
                 <div className="text-right text-xl  text-white">
-                  <p>{cart.filter((item) => (item.quantity ?? 0) > 0).length} Items</p>
+                  <p>
+                    {cart.filter((item) => (item.quantity ?? 0) > 0).length}{" "}
+                    Items
+                  </p>
                 </div>
               </div>
             </div>
@@ -486,7 +518,7 @@ export default function OrderPage() {
             {/* Form */}
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               {message && (
-                <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
+                <div className="rounded-2xl border border-red-400/30 bg-ambreder-800/10 px-3 py-2 text-l text-center text-red-400">
                   {message}
                 </div>
               )}
@@ -502,7 +534,7 @@ export default function OrderPage() {
 
               <input
                 type="tel"
-                placeholder="Phone Number"
+                placeholder="98/97......"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
@@ -530,7 +562,6 @@ export default function OrderPage() {
               >
                 {isSubmitting ? "Placing Order..." : "Order"}
               </button>
-
             </form>
           </aside>
         </div>

@@ -33,7 +33,6 @@ export default function Navbar() {
     { label: "Today's", href: "/TodaySpecial" },
     { label: "Order", href: "/Order" },
     { label: "Services", href: "/Services" },
-    { label: "Menu", href: "/Menu" },
     { label: "About", href: "/#about" },
   ];
 

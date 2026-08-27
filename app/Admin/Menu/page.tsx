@@ -17,6 +17,7 @@ type MenuItem = {
 export default function AdminMenuPage() {
   const [menus, setMenus] = useState<MenuItem[]>([]);
   const [search, setSearch] = useState("");
+  const [message, setMessage] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -113,11 +114,43 @@ export default function AdminMenuPage() {
 
   // ================= SAVE (ADD / UPDATE) =================
   const handleSave = async () => {
-    if (!form.title || !form.price) {
-      alert("Title and Price required");
+    if (!form.title || !form.price || !form.category || !form.image) {
+      setMessage("Please feild the required fild *");
       return;
     }
+    //price validetion
 
+    if (Number(form.price) <= 0) {
+      setMessage("Price con't set negetive(-)");
+      return;
+    }
+     //name validetion
+    const nameRegex = /^[A-Za-z\s]+$/;
+
+    if (!nameRegex.test(form.title)) {
+      setMessage("Item title must contain only letters");
+      return;
+    }
+     //category validetion
+    const categotyRegex = /^[A-Za-z\s]+$/;
+
+    if (!categotyRegex.test(form.category)) {
+      setMessage("Item category must contain only letters");
+      return;
+    }
+    //image url validetion
+    try {
+      const imageUrl = new URL(form.image);
+
+      if (imageUrl.protocol !== "http:" && imageUrl.protocol !== "https:") {
+        setMessage("Please enter a valid image URL");
+        return;
+      }
+    } catch {
+      setMessage("Please enter a valid image URL");
+      return;
+    }
+    setMessage("");
     setLoading(true);
 
     try {
@@ -300,20 +333,23 @@ export default function AdminMenuPage() {
         {showModal && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-gray-900 border border-gray-800 w-full max-w-xl p-6 rounded-2xl shadow-2xl">
-              <h2 className="text-2xl font-bold mb-6">
+              <h2 className="text-2xl font-bold mb-6 text-center">
                 {editId ? "Update Menu Item" : "Add New Menu Item"}
               </h2>
+              <p className=" text-red-400 text-l text-center p-2 mb-2 ">
+                {message}
+              </p>
 
               <div className="grid gap-4">
                 <input
-                  placeholder="Item Title"
+                  placeholder="Item Title *"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   className="p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-green-500 focus:outline-none transition-colors"
                 />
 
                 <input
-                  placeholder="Price (Rs)"
+                  placeholder="Price (Rs) *"
                   type="number"
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
@@ -321,7 +357,7 @@ export default function AdminMenuPage() {
                 />
 
                 <input
-                  placeholder="Category"
+                  placeholder="Category *"
                   value={form.category}
                   onChange={(e) =>
                     setForm({ ...form, category: e.target.value })
@@ -330,7 +366,7 @@ export default function AdminMenuPage() {
                 />
 
                 <input
-                  placeholder="Image URL"
+                  placeholder="Image URL *"
                   value={form.image}
                   onChange={(e) => setForm({ ...form, image: e.target.value })}
                   className="p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-green-500 focus:outline-none transition-colors"
