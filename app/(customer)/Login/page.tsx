@@ -1,9 +1,7 @@
 "use client";
-
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 
 const Page = () => {
@@ -11,199 +9,193 @@ const Page = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const [loading, setLoading] = useState(false);
-
-  const [error, setError] = useState("");
+  const validateEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     setError("");
+    setSuccess("");
 
-    if (!email || !password) {
-      setError("All fields are required");
+    if (!email.trim() || !password.trim()) {
+      setError("⚠️ Email and password are required.");
       return;
     }
 
-    // basic email format check
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError("Please enter a valid email");
+    if (!validateEmail(email)) {
+      setError("⚠️ Please enter a valid email address.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("⚠️ Password must be at least 6 characters long.");
       return;
     }
 
     try {
       setLoading(true);
 
-      const response = await apiFetch("/api/admin/login", {
+      const response = await apiFetch("/api/users/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message);
+        setError(data.message || "❌ Login failed");
         return;
       }
 
-      localStorage.setItem("adminToken", data.token);
+      setSuccess("✅ Login successful! Redirecting...");
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("casherUser", JSON.stringify(data.user || { fullName: email, email, phone: "" }));
 
-      localStorage.setItem("adminToken", data.token);
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", email);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+      }
 
-      router.push("/Admin/Dashboard");
-    } catch (error) {
-      setError("Server Error");
+      setTimeout(() => {
+        router.push("/Online");
+      }, 1000);
+    } catch (err) {
+      console.error(err);
+      setError("❌ Server error. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-950 flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Background Blur */}
-      <div className="absolute top-0 left-0 w-72 h-72 bg-orange-500/20 rounded-full blur-3xl"></div>
+    <div
+      className="min-h-screen w-full flex items-center justify-center bg-cover bg-center relative"
+      style={{
+        backgroundImage: "linear-gradient(135deg, #c5c9d9 0%, #764ba2 100%)",
+      }}
+    >
+      <div className="absolute inset-0 bg-black/30"></div>
 
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
-
-      {/* Card */}
-      <div className="w-full max-w-md relative z-10">
-        <div className="bg-white/6 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8">
-          {/* Logo */}
-          <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-r from-green-500 to-green-500 flex items-center justify-center shadow-lg">
-              <ShieldCheck size={40} className="text-white" />
-            </div>
+      <div className="relative z-10 w-full max-w-md px-6 py-8">
+        <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-8 text-white">
+            <h1 className="text-3xl font-bold text-center mb-2">Mero Deurali Cafe</h1>
+            <p className="text-center text-blue-100">Cashier login</p>
           </div>
 
-          {/* Heading */}
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-semibold text-white mb-1">
-              Sign in to Customer
-            </h1>
+          <div className="px-6 py-8">
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+                <p className="text-red-700 text-sm font-semibold">{error}</p>
+              </div>
+            )}
+            {success && (
+              <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-lg">
+                <p className="text-green-700 text-sm font-semibold">{success}</p>
+              </div>
+            )}
 
-            <p className="text-gray-400 text-sm">
-              Manage orders, menus and customers
-            </p>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="bg-red-500/20 border border-red-500 text-red-200 text-sm rounded-xl p-3 mb-5">
-              {error}
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
-            <div>
-              <label className="text-gray-200 text-sm mb-2 block">
-                Admin Email
-              </label>
-
-              <div className="relative">
-                <Mail
-                  className="absolute left-4 top-4 text-gray-400"
-                  size={18}
-                />
-
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Email Address
+                </label>
                 <input
-                  aria-label="admin email"
+                  id="email"
                   type="email"
-                  placeholder="you@company.com"
+                  placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-transparent border border-white/10 text-white placeholder:text-gray-400 rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
+                  disabled={loading}
+                  className="w-full px-4 py-3 text-black border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors duration-200 disabled:bg-gray-100"
                 />
               </div>
-            </div>
 
-            {/* Password */}
-            <div>
-              <label className="text-gray-200 text-sm mb-2 block">
-                Password
-              </label>
-
-              <div className="relative">
-                <Lock
-                  className="absolute left-4 top-4 text-gray-400"
-                  size={18}
-                />
-
-                <input
-                  aria-label="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-transparent border border-white/10 text-white placeholder:text-gray-400 rounded-xl py-3 pl-12 pr-12 outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-3.5 text-gray-400 hover:text-white"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
+              <div>
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 text-black border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors duration-200 disabled:bg-gray-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={loading}
+                    className="absolute right-3 top-3 text-gray-600 hover:text-blue-600 disabled:opacity-50"
+                  >
+                    {showPassword ? "👁️" : "👁️‍🗨️"}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Remember */}
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-gray-300">
-                <input type="checkbox" className="accent-orange-500" />
-                Remember me
-              </label>
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center">
+                  <input
+                    id="rememberMe"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    disabled={loading}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
+                  />
+                  <label htmlFor="rememberMe" className="ml-2 text-gray-700 cursor-pointer">
+                    Remember Me
+                  </label>
+                </div>
+                <Link href="/forgot-password" className="text-blue-600 hover:text-blue-800 font-semibold">
+                  Forgot Password?
+                </Link>
+              </div>
 
               <button
-                type="button"
-                className="text-blue-400 hover:text-orange-300"
+                type="submit"
+                disabled={loading}
+                className={`w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-200 transform ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg hover:scale-105 active:scale-95"
+                }`}
               >
-                Forgot Password?
+                {loading ? "Signing in..." : "Sign In"}
               </button>
+            </form>
+
+            <div className="flex items-center my-6">
+              <div className="flex-1 border-t-2 border-gray-300"></div>
+              <span className="px-4 text-gray-500 text-sm">or</span>
+              <div className="flex-1 border-t-2 border-gray-300"></div>
             </div>
 
-            {/* Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-3"
-            >
-              {loading && (
-                <div className="h-5 w-5 rounded-full border-2 border-white/60 border-t-transparent animate-spin" />
-              )}
-              <span>{loading ? "Signing In..." : "Login"}</span>
-            </button>
-          </form>
-
-          {/* Footer */}
-
-          <div className="flex items-center my-6">
-            <div className="flex-1 border-t-2 border-gray-300"></div>
-            <span className="px-4 text-white text-lg">or</span>
-            <div className="flex-1 border-t-2 border-gray-300"></div>
+            <p className="text-center text-gray-700">
+              Don&apos;t have an account? {" "}
+              <Link href="/Casher/Register" className="text-blue-600 hover:text-blue-800 font-semibold">
+                Sign Up
+              </Link>
+            </p>
           </div>
-
-          <p className="text-center text-white">
-            Don't have an account?{" "}
-            <Link
-              href="/Admin/Register"
-              className="text-blue-400 hover:text-blue-800 font-semibold"
-            >
-              Sign Up
-            </Link>
-          </p>
         </div>
       </div>
     </div>

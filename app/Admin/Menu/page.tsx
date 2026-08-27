@@ -124,14 +124,14 @@ export default function AdminMenuPage() {
       setMessage("Price con't set negetive(-)");
       return;
     }
-     //name validetion
+    //name validetion
     const nameRegex = /^[A-Za-z\s]+$/;
 
     if (!nameRegex.test(form.title)) {
       setMessage("Item title must contain only letters");
       return;
     }
-     //category validetion
+    //category validetion
     const categotyRegex = /^[A-Za-z\s]+$/;
 
     if (!categotyRegex.test(form.category)) {

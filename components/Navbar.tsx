@@ -111,16 +111,16 @@ export default function Navbar() {
   return (
     <>
       {/* Header Wrapper */}
-      <header className="sticky top-0 z-30 w-full border-b border-slate-200/80 bg-amber-50/90 backdrop-blur-md shadow-sm transition-all duration-300">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-20 items-center justify-between gap-4">
+      <header className="sticky top-0 z-30 w-full border-b border-slate-200/80 bg-amber-50 backdrop-blur-md shadow-sm transition-all duration-300">
+        <div className="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-25 items-center justify-between gap-4">
             
             {/* Logo Section */}
             <Link href="/" className="flex items-center gap-3 shrink-0">
               <img
-                src="/logo/cafelogo.png"
+                src="/logo/logo.png"
                 alt="Cafe logo"
-                className="h-12 w-12 rounded-full object-cover ring-2 ring-amber-500/20"
+                className="h-20 w-20 rounded-full object-cover ring-2 ring-amber-500/20"
               />
               <span className="hidden sm:block font-serif text-lg font-bold text-slate-800 tracking-wide italic">
                 Mero Deurali Cafe
