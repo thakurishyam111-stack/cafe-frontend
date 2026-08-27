@@ -133,7 +133,7 @@ export default function Navbar() {
                 <Link
                   key={it.href}
                   href={it.href}
-                  className={`text-sm font-medium px-4 py-2 rounded-xl transition-all duration-200 ${
+                  className={`text-l font-medium px-4 py-2 rounded-xl transition-all duration-200 ${
                     isActive(it.href)
                       ? "bg-amber-100 text-amber-900 shadow-sm"
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
