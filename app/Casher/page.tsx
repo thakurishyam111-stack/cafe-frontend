@@ -3,8 +3,23 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BadgeDollarSign, CircleDollarSign, Receipt, Smartphone, Sparkles, UserRound, Search, Loader2, LogOut } from "lucide-react";
-import { CasherUser, OrderData, fetchUnpaidOrders, submitOrderPayment } from "./casher";
+import {
+  BadgeDollarSign,
+  CircleDollarSign,
+  Receipt,
+  Smartphone,
+  Sparkles,
+  UserRound,
+  Search,
+  Loader2,
+  LogOut,
+} from "lucide-react";
+import {
+  CasherUser,
+  OrderData,
+  fetchUnpaidOrders,
+  submitOrderPayment,
+} from "./casher";
 
 const formatCurrency = (value: number) => `Rs. ${value.toLocaleString()}`;
 
@@ -13,7 +28,7 @@ const Page = () => {
 
   // Cashier Details State
   const [casher, setCasher] = useState<CasherUser>({
-    fullName: "Cashier",  
+    fullName: "Cashier",
     email: "No email available",
     phone: "No phone available",
   });
@@ -56,7 +71,7 @@ const Page = () => {
         phone: parsed.phone || "No phone available",
       });
 
-      console.log(parsed?.phone)
+      console.log(parsed?.phone);
       setIsAuthenticated(true);
     } catch {
       window.localStorage.removeItem("casherUser");
@@ -73,8 +88,26 @@ const Page = () => {
       setLoading(true);
       setMessage("");
       setOrdersList([]); // पुराना खोजिएका लटहरू सफा गर्ने
+      const nameRegex = /^[A-Za-z\s]+$/;
 
-      const matchedOrders = await fetchUnpaidOrders(customerName, customerPhone);
+      if (!nameRegex.test(customerName)) {
+        setMessage("Enter Customer Name only letter");
+        return;
+      }
+
+      const phoneRegex = /^(97|98)\d{8}$/;
+
+      if (!phoneRegex.test(customerPhone)) {
+        setMessage(
+          "Please enter a valid phone number like 98/97 and length 10  .",
+        );
+        return;
+      }
+
+      const matchedOrders = await fetchUnpaidOrders(
+        customerName,
+        customerPhone,
+      );
 
       if (matchedOrders.length > 0) {
         setOrdersList(matchedOrders);
@@ -82,7 +115,9 @@ const Page = () => {
         setMessage("No active unpaid bills found for this customer.");
       }
     } catch (error: any) {
-      setMessage(error.message || "Error connecting to server. Please try again.");
+      setMessage(
+        error.message || "Error connecting to server. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -94,9 +129,19 @@ const Page = () => {
   }, [ordersList]);
 
   // ३. वित्तीय हिसाब-किताब (Calculations)
-  const subtotal = useMemo(() => unpaidBills.reduce((sum, ord) => sum + (ord.subtotal || ord.total), 0), [unpaidBills]);
-  const vatAmount = useMemo(() => unpaidBills.reduce((sum, ord) => sum + (ord.vat || 0), 0), [unpaidBills]);
-  const rawGrandTotal = useMemo(() => unpaidBills.reduce((sum, ord) => sum + ord.total, 0), [unpaidBills]);
+  const subtotal = useMemo(
+    () =>
+      unpaidBills.reduce((sum, ord) => sum + (ord.subtotal || ord.total), 0),
+    [unpaidBills],
+  );
+  const vatAmount = useMemo(
+    () => unpaidBills.reduce((sum, ord) => sum + (ord.vat || 0), 0),
+    [unpaidBills],
+  );
+  const rawGrandTotal = useMemo(
+    () => unpaidBills.reduce((sum, ord) => sum + ord.total, 0),
+    [unpaidBills],
+  );
 
   const discount = (rawGrandTotal * Number(discountPercent || 0)) / 100;
   const payableAmount = rawGrandTotal - discount;
@@ -110,29 +155,29 @@ const Page = () => {
     // --- CASH PAYMENT ---
     if (method === "Cash") {
       if (receivedAmount < payableAmount) {
-        alert("Insufficient cash given by customer!");
+        setMessage("Insufficient cash given by customer!");
         return;
       }
 
       try {
         setPaying(true);
-        
+
         // ब्याकेन्डमा भुक्तानी पठाउने
         const paymentPromises = unpaidBills.map((ord) =>
           submitOrderPayment(ord._id, {
             method,
             cashierId: casher?.id,
-            discountPercent: Number(discountPercent)
-          })
+            discountPercent: Number(discountPercent),
+          }),
         );
 
         await Promise.all(paymentPromises);
-        alert(`All ${unpaidBills.length} bill(s) paid successfully via Cash!`);
-        
+        setMessage(`All ${unpaidBills.length} bill(s) paid successfully via Cash!`);
+
         // डाटा क्लियर गर्ने (Local States Clear)
         handleClearState();
       } catch (error) {
-        alert("Bill payment failed. Please try again.");
+        setMessage("Bill payment failed. Please try again.");
       } finally {
         setPaying(false);
       }
@@ -148,7 +193,7 @@ const Page = () => {
     const appUrl = appUrls[method];
     if (appUrl) {
       window.open(appUrl, "_blank");
-      
+
       // अनलाइन गेटवेमा जाने बित्तिकै फ्रन्टइन्ड स्क्रिनलाई क्लियर गर्ने
       handleClearState();
       alert(`Redirecting to ${method} for ${unpaidBills.length} bill(s)...`);
@@ -180,8 +225,12 @@ const Page = () => {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-          <p className="text-lg font-semibold text-slate-800">Redirecting to cashier login...</p>
-          <p className="mt-2 text-sm text-slate-500">Please sign in to access the cashier dashboard.</p>
+          <p className="text-lg font-semibold text-slate-800">
+            Redirecting to cashier login...
+          </p>
+          <p className="mt-2 text-sm text-slate-500">
+            Please sign in to access the cashier dashboard.
+          </p>
         </div>
       </div>
     );
@@ -190,7 +239,6 @@ const Page = () => {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_32%),linear-gradient(135deg,_#f8fafc_0%,_#eef2ff_100%)] p-4 md:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
-        
         {/* Top Header Section */}
         <header className="mb-6 overflow-hidden rounded-[28px] bg-slate-800 text-white shadow-2xl md:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -202,7 +250,8 @@ const Page = () => {
                 Welcome back, {casher.fullName}
               </h1>
               <p className="mt-3 text-sm text-slate-300 md:text-base">
-                Search active orders via customer info, process payments securely, and refresh workflow in real-time.
+                Search active orders via customer info, process payments
+                securely, and refresh workflow in real-time.
               </p>
             </div>
 
@@ -230,15 +279,15 @@ const Page = () => {
 
         {/* Dashboard Main Grid */}
         <main className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-          
           {/* Left Side: Search & Items Panel */}
           <section className="space-y-6">
-            
             {/* Search Section */}
             <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm md:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 text-center">Find Customer Orders</h2>
+                  <h2 className="text-xl font-semibold text-slate-900 text-center">
+                    Find Customer Orders
+                  </h2>
                 </div>
               </div>
 
@@ -287,64 +336,77 @@ const Page = () => {
             </div>
 
             {/* Display Found Items Section */}
-      <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm md:p-6">
-  <div className="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h3 className="text-xl font-semibold text-slate-900">Order Items</h3>
-    </div>
-    <div className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
-      {unpaidBills.length} Bill(s) Matched
-    </div>
-  </div>
+            <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-900">
+                    Order Items
+                  </h3>
+                </div>
+                <div className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
+                  {unpaidBills.length} Bill(s) Matched
+                </div>
+              </div>
 
-  <div className="mt-4 space-y-3">
-    {unpaidBills.length > 0 ? (
-      unpaidBills.map((ord) =>
-        ord.items?.map((item, index) => (
-          <div key={`${ord._id}-${index}`} className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-slate-300">
-            {/* बायाँ साइड: ग्राहकको नाम र आइटमको विवरण */}
-            <div className="space-y-1">
-              {/* Customer Name सानो र फिक्का अक्षरमा थपिएको */}
-              <p className="text-xs font-medium uppercase tracking-wider text-green-600">
-                Welcome:  {ord.customerName}
-              </p>
-              {/* Item Name */}
-              <p className="font-semibold text-slate-900 text-base p-2">{item.title}</p>
-              <p>{item.billNo || ""}</p>
-              {/* Quantity */}
-              <p className="text-sm text-slate-500">Qty {item.quantity}</p>
-            </div>
+              <div className="mt-4 space-y-3">
+                {unpaidBills.length > 0 ? (
+                  unpaidBills.map((ord) =>
+                    ord.items?.map((item, index) => (
+                      <div
+                        key={`${ord._id}-${index}`}
+                        className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-slate-300"
+                      >
+                        {/* बायाँ साइड: ग्राहकको नाम र आइटमको विवरण */}
+                        <div className="space-y-1">
+                          {/* Customer Name सानो र फिक्का अक्षरमा थपिएको */}
+                          <p className="text-xs font-medium uppercase tracking-wider text-green-600">
+                            Welcome: {ord.customerName}
+                          </p>
+                          {/* Item Name */}
+                          <p className="font-semibold text-slate-900 text-base p-2">
+                            {item.title}
+                          </p>
+                          <p>{item.billNo || ""}</p>
+                          {/* Quantity */}
+                          <p className="text-sm text-slate-500">
+                            Qty {item.quantity}
+                          </p>
+                        </div>
 
-            {/* दायाँ साइड: कुल रकम */}
-            <div className="text-right flex flex-col justify-center">
-              <p className="font-bold text-slate-900 text-base">
-                {formatCurrency(item.quantity * item.price)}
-              </p>
+                        {/* दायाँ साइड: कुल रकम */}
+                        <div className="text-right flex flex-col justify-center">
+                          <p className="font-bold text-slate-900 text-base">
+                            {formatCurrency(item.quantity * item.price)}
+                          </p>
+                        </div>
+                      </div>
+                    )),
+                  )
+                ) : (
+                  <p className="text-center text-sm py-6 text-slate-400">
+                    No live items to display. Use the search block above.
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        ))
-      )
-    ) : (
-      <p className="text-center text-sm py-6 text-slate-400">
-        No live items to display. Use the search block above.
-      </p>
-    )}
-  </div>
-</div>
           </section>
 
           {/* Right Side: Calculation & Actions Panel */}
           <aside className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm md:p-6 h-fit">
             <div className="flex items-center gap-2">
               <Receipt className="h-5 w-5 text-emerald-600" />
-              <h2 className="text-xl font-semibold text-slate-900">Order payment summary</h2>
+              <h2 className="text-xl font-semibold text-slate-900">
+                Order payment summary
+              </h2>
             </div>
 
             <div className="mt-5 space-y-4">
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
                 Cash given
                 <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">Rs.</span>
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                    Rs.
+                  </span>
                   <input
                     type="number"
                     min="0"
@@ -368,7 +430,9 @@ const Page = () => {
                     onChange={(e) => setDiscountPercent(e.target.value)}
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white disabled:opacity-60"
                   />
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">%</span>
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">
+                    %
+                  </span>
                 </div>
               </label>
 
@@ -395,8 +459,14 @@ const Page = () => {
                     <CircleDollarSign className="h-4 w-4 text-emerald-300" />
                     Return cash
                   </span>
-                  <span className={`font-semibold ${returnAmount >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
-                    {formatCurrency(unpaidBills.length > 0 && returnAmount > 0 ? returnAmount : 0)}
+                  <span
+                    className={`font-semibold ${returnAmount >= 0 ? "text-emerald-300" : "text-rose-300"}`}
+                  >
+                    {formatCurrency(
+                      unpaidBills.length > 0 && returnAmount > 0
+                        ? returnAmount
+                        : 0,
+                    )}
                   </span>
                 </div>
               </div>
@@ -411,10 +481,15 @@ const Page = () => {
                 <p className="mt-2">
                   {returnAmount >= 0
                     ? "Payment is ready to complete."
-                    : "Customer cash is short by " + formatCurrency(Math.abs(returnAmount)) + "."}
+                    : "Customer cash is short by " +
+                      formatCurrency(Math.abs(returnAmount)) +
+                      "."}
                 </p>
               </div>
             )}
+            <p className="mt-4 text-sm text-center text-red-500 p-2 rounded-xl">
+              {message}
+            </p>
 
             {/* Action Buttons Group */}
             <div className="mt-6 space-y-2">
