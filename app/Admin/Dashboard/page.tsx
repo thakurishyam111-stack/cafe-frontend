@@ -133,32 +133,7 @@ export default function PremiumDashboard() {
     .reduce((sum, o) => sum + (o.total || 0), 0);
 
   const netProfit = totalRevenue * 0.65; // Assuming 35% cost
-  const lowStockItems = [
-    {
-      id: "1",
-      name: "Arabica Coffee Beans",
-      currentStock: 5,
-      minimumStock: 20,
-      unit: "kg",
-      percentage: 25,
-    },
-    {
-      id: "2",
-      name: "Fresh Milk",
-      currentStock: 8,
-      minimumStock: 25,
-      unit: "liters",
-      percentage: 32,
-    },
-    {
-      id: "3",
-      name: "Chocolate Syrup",
-      currentStock: 3,
-      minimumStock: 15,
-      unit: "bottles",
-      percentage: 20,
-    },
-  ];
+ 
 
   // Chart Data
   const salesData = [
@@ -182,17 +157,17 @@ export default function PremiumDashboard() {
   const quickActions = [
     {
       icon: Plus,
-      label: "New Order",
+      label: "View New Order",
       href: "/Admin/Order",
       color: "green" as const,
-      description: "Create a new order",
+      description: "view a new order",
     },
     {
       icon: Users,
-      label: "Add Customer",
+      label: "View Customer",
       href: "/Admin/Customer",
       color: "blue" as const,
-      description: "Register new customer",
+      description: "View new customer",
     },
     {
       icon: Coffee,
@@ -211,7 +186,7 @@ export default function PremiumDashboard() {
     {
       icon: ChefHat,
       label: "View Kitchen",
-      href: "/Kitchen",
+      href: "/Admin/AdminKitchen",
       color: "pink" as const,
       description: "Kitchen orders",
     },
@@ -318,9 +293,7 @@ export default function PremiumDashboard() {
         {/* ALERTS & SUMMARY ROW */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           {/* Low Stock Alert - Spans 2 columns */}
-          <div className="lg:col-span-2">
-            <LowStockAlert items={lowStockItems} />
-          </div>
+         
 
           {/* Summary Cards - Right Column */}
           <div className="grid grid-cols-1 gap-4">
